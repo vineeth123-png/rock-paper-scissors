@@ -9,6 +9,17 @@ function isValidDraw(playerSelection) {
     return possibleDraws.findIndex(draw => draw === playerDraw) !== -1;
 }
 
+const rockButton = document.querySelector('.rock-btn');
+rockButton.addEventListener('click', function(e) {playRoundDOMWrapper('rock', getComputerChoice());} );
+const paperButton = document.querySelector('.paper-btn');
+paperButton.addEventListener('click', function(e) {playRoundDOMWrapper('paper', getComputerChoice());} );
+const scissorsButton = document.querySelector('.scissors-btn');
+scissorsButton.addEventListener('click', function(e) {playRoundDOMWrapper('scissors', getComputerChoice());} );
+
+var playerWins = 0, computerWins = 0;
+
+
+
 function game() {
     let playerWins = 0, computerWins = 0;
     
@@ -76,12 +87,76 @@ function playRound(playerSelection, computerSelection) {
     }
 
     if(isDraw) {
-        playComments = 'Its a draw!';
+        playComments = "This round's a draw!";
     } else if(playerWon) {
-        playComments = `You Win! ${playerDraw} beats ${computerSelection}`;
+        playComments = `You Win this round! ${playerDraw} beats ${computerSelection}`;
     } else {
-        playComments = `You Lose! ${computerSelection} beats ${playerDraw}`;
+        playComments = `You Lose this round! ${computerSelection} beats ${playerDraw}`;
     }
 
     return playComments;
+}
+
+function playRoundDOMWrapper(playerSelection, computerSelection) {
+
+    
+
+    resetIfInInitialState();
+    // add round's summary into div's textContent
+    const containerDiv = document.querySelector('.game-track');
+    const scoreTrackingDiv = document.createElement('p');
+    const playComments = playRound(playerSelection, computerSelection);
+
+    scoreTrackingDiv.textContent += playComments;
+    containerDiv.appendChild(scoreTrackingDiv);
+
+    if (playComments.includes('Win')) {
+        playerWins++;
+    } else if(playComments.includes('Lose')) {
+        computerWins++;
+    }
+
+    // display scores in HTML
+    displayScores();
+
+    // check if game's done.
+    const {isFinished, verdict} = checkIfGameFinished();
+    const gameTrackingDiv = document.createElement('p');
+    if (isFinished) {
+        gameTrackingDiv.textContent = 'Game Over!!!';
+        gameTrackingDiv.textContent += verdict;
+        containerDiv.appendChild(gameTrackingDiv);
+        // Re-write scores to play new game.
+        playerWins = 0; computerWins = 0;
+    }
+}
+
+function checkIfGameFinished() {
+    if(playerWins === 5) {
+        return {isFinished: true, verdict: 'Player Wins!'};
+    } else if (computerWins === 5) {
+        return {isFinished: true, verdict: 'Player Loses!'};
+    }
+
+    return {isFinished: false, verdict: 'An exciting match in progress!'};
+}
+
+function resetIfInInitialState() {
+    if(playerWins === 0 && computerWins === 0) {
+        const containerDiv = document.querySelector('.game-track');
+        containerDiv.textContent = '';
+    }
+}
+
+function displayScores() {
+    let scoresDiv = document.querySelector(".scores");
+    if (scoresDiv === null) {
+        scoresDiv = document.createElement('p');
+        scoresDiv.classList.add('scores');
+        scoresDiv.textContent = `Player: ${playerWins} Computer: ${computerWins}`;
+
+        const containerDiv = document.querySelector('.game-track');
+        containerDiv.appendChild(scoresDiv);
+    }
+    scoresDiv.textContent = `Player: ${playerWins} Computer: ${computerWins}`;
 }
